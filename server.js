@@ -4,9 +4,9 @@ const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
-
+const moment = require('moment-timezone');
 const cookieParser = require('cookie-parser')
-
+moment.tz.setDefault("Asia/Kolkata");
 app.use(bodyParser.json());
 app.use(cookieParser(""));
 app.use(cors());
