@@ -10,16 +10,16 @@ moment.tz.setDefault("Asia/Kolkata");
 app.use(bodyParser.json());
 app.use(cookieParser(""));
 app.use(cors());
+const logger = require('./utils/logger');
 
+
+const userRouter = require("./src/routes/user.route");
+const sensorsRoute = require("./src/routes/sensors.route");
+const { wss } = require('./web-socket');
 
 app.get('/', (req, res, next)=>{
     return res.json(200);
 });
-
-
-
-const userRouter = require("./src/routes/user.route");
-const sensorsRoute = require("./src/routes/sensors.route")
 
 app.use("/api/users", userRouter);
 app.use("/api/sensors", sensorsRoute);
@@ -36,7 +36,7 @@ const URL = `mongodb+srv://root:root1234@cluster0.oxgyoja.mongodb.net/?retryWrit
 
 
 // Start the server
-const port = process.env.PORT || 5000;;
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

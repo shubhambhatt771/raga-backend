@@ -1,9 +1,10 @@
+const logger = require("../../utils/logger");
+const { wss, broadcastMessage } = require("../../web-socket");
 const caliberationsModel = require("../models/caliberations.model");
 const sensorsModel = require("../models/sensors.model");
 const SensorsModel = require("../models/sensors.model");
 const moment = require('moment-timezone');
-
-
+const WebSocket = require('ws');
 exports.viewSensorsData = async (req, res) => {
     try{
         let date = req.query.date || moment().format('DD-MM-YYYY');
@@ -61,6 +62,8 @@ exports.viewSensorsData = async (req, res) => {
 exports.createSensorsData = async (req, res) => {
     try{
         const sensorsData = req.body.data;
+        let result = [];
+        logger.info('inside create sensor data');
         sensorsData.forEach(async obj => {
             if (obj['remark'] === 'CALIBERATION'){
                 // caliberation mode
@@ -79,11 +82,13 @@ exports.createSensorsData = async (req, res) => {
                 flow = flow !== defaultSensorValues.flow ? (flow - defaultSensorValues.flow) * 0.625 : 0;
                 psi = psi !== defaultSensorValues.psi ? ( (psi / 27.07)-1.25 ) : 0;
                 obj = {...obj, temp:temp.toFixed(2), flow: flow.toFixed(2), psi: psi.toFixed(2)};
+                result.push(obj);
                 await SensorsModel.create({
                     ...obj
                 });
             } 
         });
+        broadcastMessage(result);
         res.status(201).json({ status: "success" });
     }
     catch(error){
@@ -93,6 +98,7 @@ exports.createSensorsData = async (req, res) => {
 
 exports.setCaliberations = async (req, res) => {
     try{
+      logger.info('setting default values for sensors');
         const sensorsData = req.body.data;
         sensorsData.forEach(async obj => {
             console.log(obj, 'object here');
